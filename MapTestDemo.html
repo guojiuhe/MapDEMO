@@ -106,9 +106,13 @@ var len=urlinfo.length;//获取url的长度
 var  offset=urlinfo.lastIndexOf("?");//设置参数字符串开始的位置
 var arrTmp = "";
 if (offset != -1){
-var paramStr=urlinfo.substr(offset + 1,len);
-// paramStr = "?02190&06870&0450&030";
- arrTmp = paramStr.split('&');
+	var paramStr=urlinfo.substr(offset + 1,len);
+	// paramStr = "?02190&06870&0450&030";
+	var p = /[a-z]/i;
+	var b = p.test(paramStr);
+	if (!b){
+		arrTmp = paramStr.split('&');
+	}
 }
 
 generateMain();
