@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=B0YtYs8OiGix72kbfASDmAjeKXBEziLg"></script>
+	<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js" type="text/javascript"></script>
+<style type="text/css">
+body, html{
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	font-family: "微软雅黑";
+}
+#allmap{
+	width: 75%;
+	height: 100%;
+	float:left;
+}
+p{
+	font-size: 14px;
+	display:inline;
+}
+a{
+	text-decoration:none;
+	font-size: 14px;
+}
+input{
+	width:50px;
+}
+.islandTable{
+    margin-left: 25px;
+}
+.islandTable tr td{
+	font-size:14px;
+	text-align: center;
+}
+.islandTable tr th{
+	font-size:14px;
+	text-align: center;
+}
+.islandTable tr td input{
+	text-align: center;
+	border:none;
+	width: 100%; 
+	height: 100%;
+}
+</style>
+<title>Map Demo</title>
+</head>
+<body>
+	<div id="allmap"></div>
+	<div id="r-result" style="margin: 10px 0 0 10px;float:left;width: 20%;">	
+		<div>
+			<p style="font-weight: bold;">岛屿信息：</p>
+			<table border="0" class="islandTable">
+				<tr><th style="width: 30px;">编号</th><th style="width: 100px;">名称</th><th style="width: 120px;">坐标（经纬度）</th></tr>
+				<tr><td>0</td><td><input id="island0" value="中心岛"></td><td><input id="point0" value="112.345223,16.83769"></td></tr>
+				<tr><td>1</td><td><input id="island1" value="北礁"></td><td><input id="point1" value="111.511075,17.095528"></td></tr>
+				<tr><td>2</td><td><input id="island2" value="七连屿"></td><td><input id="point2" value="112.306057,16.976894"></td></tr>
+				<tr><td>3</td><td><input id="island3" value="东岛"></td><td><input id="point3" value="112.734513,16.663469"></td></tr>
+				<tr><td>4</td><td><input id="island4" value="滨湄滩"></td><td><input id="point4" value="112.464428,16.354372"></td></tr>
+				<tr><td>5</td><td><input id="island5" value="浪花礁"></td><td><input id="point5" value="112.516027,16.033111"></td></tr>
+				<tr><td>6</td><td><input id="island6" value="华光礁"></td><td><input id="point6" value="111.808019,16.232903"></td></tr>
+				<tr><td>7</td><td><input id="island7" value="中建岛"></td><td><input id="point7" value="111.214418,15.770491"></td></tr>
+				<tr><td>8</td><td><input id="island8" value="金银岛"></td><td><input id="point8" value="111.531412,16.442477"></td></tr>
+				<tr><td>9</td><td><input id="island9" value="晋卿岛"></td><td><input id="point9" value="111.752827,16.455793"></td></tr>
+			</table>
+			<a href="javascript:void(0)" onclick="generateMain();">更新</a>
+		</div>
+		<div style="margin: 5px 0 0 0;">
+			<p style="font-weight: bold;">救援路线：</p>
+		</div>
+		<div style="margin: 5px 0 0 0;" class="note">
+		
+		</div>
+		<div style="margin: 5px 0 0 0;">
+			<p style="font-weight: bold;">当前点坐标是:</p><input id="pointCoordinate" type="text" style="width:150px; margin-left:10px;" />
+		</div>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+
+var map = new BMap.Map("allmap"); // 创建Map实例
+map.centerAndZoom(new BMap.Point(112.097489,16.545098), 10.2);
+map.enableScrollWheelZoom(true); // 开启鼠标滚轮缩放
+
+var lineColor = new Array();
+var islandName = new Array();
+var islandPoint = new Array();
+
+var island0;
+var island1;
+var island2;
+var island3;
+var island4;
+var island5;
+var island6;
+var island7;
+var island8;
+var island9;
+
+var urlinfo=window.location.href; //获取当前页面的url
+var len=urlinfo.length;//获取url的长度
+var  offset=urlinfo.indexOf("?");//设置参数字符串开始的位置
+var arrTmp = "";
+if (offset != -1){
+var paramStr=urlinfo.substr(offset + 1,len);
+// paramStr = "?02190&06870&0450&030";
+ arrTmp = paramStr.split('&');
+}
+
+generateMain();
+
+function generateIslandAndLineColor(){
+	//01&02&03&04&05&06&07&08&09
+	lineColor[0] = "#FF0000"; //红
+	lineColor[1] = "#227700"; //绿
+	lineColor[2] = "#FF8800 "; //橙
+	lineColor[3] = "#00FFFF";  //蓝
+	lineColor[4] = "#FFFF00"; // 黄
+	lineColor[5] = "#000000"; // 黑
+	lineColor[6] = "#666666"; //灰
+	lineColor[7] = "#FFFFFF";//白
+	lineColor[8] = "#CC00CC";//紫
+
+	islandPoint[0] = $("#point0").val(); 
+	islandPoint[1] = $("#point1").val(); 
+	islandPoint[2] = $("#point2").val();
+	islandPoint[3] = $("#point3").val();  
+	islandPoint[4] = $("#point4").val(); 
+	islandPoint[5] = $("#point5").val(); 
+	islandPoint[6] = $("#point6").val();
+	islandPoint[7] = $("#point7").val(); 
+	islandPoint[8] = $("#point8").val(); 
+	islandPoint[9] = $("#point9").val(); 
+
+	islandName[0] = $("#island0").val(); 
+	islandName[1] = $("#island1").val(); 
+	islandName[2] = $("#island2").val();
+	islandName[3] = $("#island3").val();  
+	islandName[4] = $("#island4").val(); 
+	islandName[5] = $("#island5").val(); 
+	islandName[6] = $("#island6").val();
+	islandName[7] = $("#island7").val(); 
+	islandName[8] = $("#island8").val(); 
+	islandName[9] = $("#island9").val(); 
+}
+
+function generateIsand(){
+	// 创建岛屿 北礁 七连屿 东岛 滨湄滩 浪花礁 华光礁 中建岛  金银岛  晋卿岛
+	island0 = new BMap.Point(islandPoint[0].split(",")[0],islandPoint[0].split(",")[1]);
+	island1 = new BMap.Point(islandPoint[1].split(",")[0],islandPoint[1].split(",")[1]);
+	island2 = new BMap.Point(islandPoint[2].split(",")[0],islandPoint[2].split(",")[1]);
+	island3 = new BMap.Point(islandPoint[3].split(",")[0],islandPoint[3].split(",")[1]);
+	island4 = new BMap.Point(islandPoint[4].split(",")[0],islandPoint[4].split(",")[1]);
+	island5 = new BMap.Point(islandPoint[5].split(",")[0],islandPoint[5].split(",")[1]);
+	island6 = new BMap.Point(islandPoint[6].split(",")[0],islandPoint[6].split(",")[1]);
+	island7 = new BMap.Point(islandPoint[7].split(",")[0],islandPoint[7].split(",")[1]);
+	island8 = new BMap.Point(islandPoint[8].split(",")[0],islandPoint[8].split(",")[1]);
+	island9 = new BMap.Point(islandPoint[9].split(",")[0],islandPoint[9].split(",")[1]);
+                                                              
+	map.clearOverlays();
+	// 文字
+	addLabelToPoint(islandName[0],  island0, "red");
+	addLabelToPoint(islandName[1], island1, "red");
+	addLabelToPoint(islandName[2], island2, "red");
+	addLabelToPoint(islandName[3], island3, "red");
+	addLabelToPoint(islandName[4], island4, "red");
+	addLabelToPoint(islandName[5], island5, "red");
+	addLabelToPoint(islandName[6], island6, "red");
+	addLabelToPoint(islandName[7], island7, "red");
+	addLabelToPoint(islandName[8], island8, "red");
+	addLabelToPoint(islandName[9], island9, "red");	
+	// 创建标注
+	var marker0 = new BMap.Marker(island0); 
+	map.addOverlay(marker0);
+	map.addOverlay(new BMap.Marker(island1));
+	map.addOverlay(new BMap.Marker(island2));
+	map.addOverlay(new BMap.Marker(island3));
+	map.addOverlay(new BMap.Marker(island4));
+	map.addOverlay(new BMap.Marker(island5));
+	map.addOverlay(new BMap.Marker(island6));
+	map.addOverlay(new BMap.Marker(island7));
+	map.addOverlay(new BMap.Marker(island8));
+	map.addOverlay(new BMap.Marker(island9));
+	//marker0.setAnimation(BMAP_ANIMATION_BOUNCE);
+}
+
+function generateRoute(){
+	$(".note").html("");
+	var htmlStr = "";
+	htmlStr += "<div sytle='margin: 5px 0 0 5px;'>";
+	for(var index in arrTmp){
+	    var strLine = arrTmp[index];
+		strLine=strLine.replace(/[^0-9]/ig,"");
+		htmlStr += "<p sytle='width：90%;'>路线" + (Number(index) + 1) + ": ";
+		for (var i in strLine){
+			if (i != 0){
+				var tempPolyline = "new BMap.Polyline([" + "island" + (strLine[i - 1]) + ", " + "island" + strLine[i] + "], {strokeColor:'" + lineColor[index] + "', strokeWeight:2, strokeOpacity:0.5})";
+				eval("polyline" + i + strLine[i - 1] + "=" + tempPolyline);	
+				eval("map.addOverlay(polyline" + i + strLine[i - 1] + "=" + tempPolyline + ")");
+				eval("addArrow(polyline" + i + strLine[i - 1] + ",10,Math.PI/7,'" + lineColor[index] + "')");
+			}
+			if (i != strLine.length -1) {
+				htmlStr += islandName[strLine[i]] + "->";
+			}
+			else {
+				htmlStr += islandName[strLine[i]];
+			}
+		}
+		htmlStr += "</p><br />";
+	}
+	htmlStr += "</div>";
+	$(".note").html(htmlStr);
+}
+
+function generateMain(){
+	generateIslandAndLineColor();
+	for (var i = 0; i <= 9; i++){
+		var tempIslandPoint = islandPoint[i];
+		var p = /[a-z]/i;
+		var b = p.test(tempIslandPoint);
+		if ((tempIslandPoint.split('.')).length-1 > 2|| (tempIslandPoint.split(',')).length-1 > 1 || b){
+			alert("岛屿" + i + "坐标非法：" + tempIslandPoint);
+			return;
+		}
+	}
+	generateIsand();
+	generateRoute();
+}
+
+function addLabelToPoint(name, point, color){
+	var opts = {
+		position : point, // 指定文本标注所在的地理位置
+		offset : new BMap.Size(12,-24) // 设置文本偏移量
+	}
+	var label = new BMap.Label(name, opts); // 创建文本标注对象
+	label.setStyle({
+		color : color,
+		fontSize : "12px",
+		height : "20px",
+		lineHeight : "20px",
+		fontFamily : "微软雅黑"
+	});
+	map.addOverlay(label); 
+}
+
+map.addEventListener("click",function(e){
+	$("#pointCoordinate").val(e.point.lng + "," + e.point.lat);
+});
+
+function addArrow(polyline, length, angleValue, color) { // 绘制箭头的函数
+	var linePoint = polyline.getPath();// 线的坐标串
+	var arrowCount = linePoint.length;
+	for (var i = 1; i < arrowCount; i++) { // 在拐点处绘制箭头
+		var pixelStart = map.pointToPixel(linePoint[i - 1]);
+		var pixelEnd = map.pointToPixel(linePoint[i]);
+		var angle = angleValue;// 箭头和主线的夹角
+		var r = length; // r/Math.sin(angle)代表箭头长度
+		var delta = 0; // 主线斜率，垂直时无斜率
+		var param = 0; // 代码简洁考虑
+		var pixelTemX, pixelTemY;// 临时点坐标
+		var pixelX, pixelY, pixelX1, pixelY1;// 箭头两个点
+		if (pixelEnd.x - pixelStart.x == 0) { // 斜率不存在是时
+			pixelTemX = pixelEnd.x;
+			if (pixelEnd.y > pixelStart.y) {
+				pixelTemY = pixelEnd.y - r;
+			} else {
+				pixelTemY = pixelEnd.y + r;
+			}
+			// 已知直角三角形两个点坐标及其中一个角，求另外一个点坐标算法
+			pixelX = pixelTemX - r * Math.tan(angle);
+			pixelX1 = pixelTemX + r * Math.tan(angle);
+			pixelY = pixelY1 = pixelTemY;
+		} else // 斜率存在时
+		{
+			delta = (pixelEnd.y - pixelStart.y) / (pixelEnd.x - pixelStart.x);
+			param = Math.sqrt(delta * delta + 1);
+
+			if ((pixelEnd.x - pixelStart.x) < 0) // 第二、三象限
+			{
+				pixelTemX = pixelEnd.x + r / param;
+				pixelTemY = pixelEnd.y + delta * r / param;
+			} else// 第一、四象限
+			{
+				pixelTemX = pixelEnd.x - r / param;
+				pixelTemY = pixelEnd.y - delta * r / param;
+			}
+			// 已知直角三角形两个点坐标及其中一个角，求另外一个点坐标算法
+			pixelX = pixelTemX + Math.tan(angle) * r * delta / param;
+			pixelY = pixelTemY - Math.tan(angle) * r / param;
+
+			pixelX1 = pixelTemX - Math.tan(angle) * r * delta / param;
+			pixelY1 = pixelTemY + Math.tan(angle) * r / param;
+		}
+		var pointArrow = map.pixelToPoint(new BMap.Pixel(pixelX, pixelY));
+		var pointArrow1 = map.pixelToPoint(new BMap.Pixel(pixelX1, pixelY1));
+		var Arrow = new BMap.Polyline(
+				[ pointArrow, linePoint[i], pointArrow1 ], {
+					strokeColor : color,
+					strokeWeight : 2,
+					strokeOpacity : 0.5
+				});
+		map.addOverlay(Arrow);
+	}
+}
+</script>
