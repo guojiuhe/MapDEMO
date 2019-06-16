@@ -198,9 +198,7 @@ function generateRoute(){
 	htmlStr += "<div sytle='margin: 5px 0 0 5px;'>";
 	for(var index in arrTmp){
 	    var strLine = arrTmp[index];
-		alert(strLine);
 		strLine=strLine.replace(/[^0-9]/ig,"");
-		alert(strLine);
 		htmlStr += "<p sytle='width：90%;'>路线" + (Number(index) + 1) + ": ";
 		for (var i in strLine){
 			if (i != 0){
